@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:say_yes_app/pages/feed_page.dart';
+import 'package:say_yes_app/pages/home_page.dart';
 import 'package:say_yes_app/pages/login_page.dart';
+import 'package:flutter/material.dart';
 
 class AuthService{
 
@@ -19,20 +21,24 @@ class AuthService{
           'email': email,
           'profileImageUrl': '',
         });
-        Navigator.pushReplacementNamed(context, FeedPage.id);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
       }
     } catch (e) {
       print(e);
     }
   }
 
-  static void logout() {
+  static void logout(BuildContext context) {
     _auth.signOut();
+    Navigator.pushReplacementNamed(context, LoginPage.id);
   }
 
-  static void login(String email, String password) async {
+  static void login(BuildContext context, String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      AuthResult authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      FirebaseUser signedInUser = authResult.user;
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
     } catch (e) {
       print(e);
     }

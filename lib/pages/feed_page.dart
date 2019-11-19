@@ -15,7 +15,7 @@ class _FeedPageState extends State<FeedPage> {
       backgroundColor: Colors.blue,
       body: Center(
         child: FlatButton(
-          onPressed: () => AuthService.logout(),
+          onPressed: () => AuthService.logout(context),
           child: Text('LOGOUT'),
         ),
       ),
