@@ -16,7 +16,7 @@ class _ActivityPageState extends State<ActivityPage> {
             style: TextStyle(
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.bold,
-                fontSize: 35.0),
+                fontSize: 30.0),
           )),
       body: Center(
         child: Text(

@@ -34,6 +34,8 @@ dependencies:
   path_provider: ^1.4.2
   uuid: ^2.0.4
   provider: ^3.1.0+1
+  geopoint: ^0.7.0
+  datetime_picker_formfield: ^0.4.3
 
 
 dev_dependencies:

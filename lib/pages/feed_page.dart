@@ -19,7 +19,7 @@ class _FeedPageState extends State<FeedPage> {
             style: TextStyle(
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.bold,
-                fontSize: 35.0),
+                fontSize: 30.0),
           )),
       backgroundColor: Colors.blue,
       body: Center(

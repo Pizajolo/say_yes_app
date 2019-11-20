@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:say_yes_app/pages/add_event_page.dart';
 
 class CreateEventPage extends StatefulWidget {
   @override
@@ -16,11 +17,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
             style: TextStyle(
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.bold,
-                fontSize: 35.0),
-          )),
+                fontSize: 30.0),
+          ),
+        actions: <Widget>[
+          IconButton(
+            color: Colors.blueAccent,
+            icon: Icon(Icons.add),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEventPage())),
+          )
+        ],),
       body: Center(
         child: Text(
-          'CreateEvent Page',
+          'Create a new Event',
         ),
       ),
     );

@@ -26,7 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
             style: TextStyle(
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.bold,
-                fontSize: 35.0),
+                fontSize: 30.0),
           )),
       backgroundColor: Colors.white,
       body: FutureBuilder(
