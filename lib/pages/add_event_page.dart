@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/models/user_model.dart';
 import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/services/storage_service.dart';
@@ -53,7 +54,15 @@ class _AddEventPageState extends State<AddEventPage> {
       _hostId = Provider.of<UserData>(context).currentUserId;
       _guests = [Provider.of<UserData>(context).currentUserId];
       String _eventId = Uuid().v4();
-
+      _address = {
+        'street': _street,
+        'houseNumber': _houseNumber,
+        'postcode': _postcode,
+        'city': _city,
+        'country': _country,
+      };
+      Event event = new Event(id: _eventId, eventName: _eventName, description: _description, type: _type, hostId: _hostId, address: _address, active: true, price: _price, guestNumber: _guestNumber, guests: _guests, location: _location);
+      DatabaseService.createEvent(event);
       Navigator.pop(context);
     }
   }
@@ -260,7 +269,7 @@ class _AddEventPageState extends State<AddEventPage> {
                                 ? 'Please enter a valid price'
                                 : null,
                             onSaved: (input) =>
-                            _guestNumber = num.tryParse(input),
+                            _price = num.tryParse(input),
                           ),
                         ),
                       ],
