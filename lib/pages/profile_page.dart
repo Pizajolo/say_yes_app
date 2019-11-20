@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:say_yes_app/pages/edit_profile_page.dart';
 import 'package:say_yes_app/utilities/constants.dart';
@@ -18,7 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: FutureBuilder(
-        future: userRef.document(widget.userId).get(),
+        future: usersRef.document(widget.userId).get(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData){
             return Center(child: CircularProgressIndicator(),);
@@ -35,8 +36,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: <Widget>[
                     CircleAvatar(
                       radius: 50.0,
+                      backgroundColor: Colors.grey,
                       backgroundImage:
-                          NetworkImage('https://i.redd.it/dmdqlcdpjlwz.jpg'),
+                          user.profileImageUrl.isEmpty ? AssetImage('assets/images/default_avatar.png') : CachedNetworkImageProvider(user.profileImageUrl),
                     ),
                     Expanded(
                       child: Column(

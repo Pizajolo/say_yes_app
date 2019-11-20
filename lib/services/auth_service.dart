@@ -21,7 +21,8 @@ class AuthService{
           'email': email,
           'profileImageUrl': '',
         });
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
+        Navigator.pop(context);
+//        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
       }
     } catch (e) {
       print(e);
@@ -30,15 +31,14 @@ class AuthService{
 
   static void logout(BuildContext context) {
     _auth.signOut();
-    Navigator.pushReplacementNamed(context, LoginPage.id);
+//    Navigator.pushReplacementNamed(context, LoginPage.id);
   }
 
   static void login(BuildContext context, String email, String password) async {
     try {
       AuthResult authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser signedInUser = authResult.user;
-
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
+//      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
     } catch (e) {
       print(e);
     }

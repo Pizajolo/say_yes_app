@@ -11,8 +11,6 @@ class HomePage extends StatefulWidget {
   final String userId;
   HomePage({this.userId});
 
-//  static final String id = 'home_page';
-
   @override
   _HomePageState createState() => _HomePageState();
 }
