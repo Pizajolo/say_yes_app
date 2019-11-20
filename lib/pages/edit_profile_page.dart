@@ -57,29 +57,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   _submit() async {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate() && !_isLoading) {
       _formKey.currentState.save();
 
       setState(() {
         _isLoading = true;
       });
-      // Update user database
-      String _profileImageURL = '';
 
-      if (_profileImageURL == null) {
-        _profileImageURL = widget.user.profileImageUrl;
+      // Update user in database
+      String _profileImageUrl = '';
+
+      if (_profileImage == null) {
+        _profileImageUrl = widget.user.profileImageUrl;
       } else {
-        _profileImageURL = await StorageService.uploadUserProfileImage(
-            widget.user.profileImageUrl, _profileImage);
+        _profileImageUrl = await StorageService.uploadUserProfileImage(
+          widget.user.profileImageUrl,
+          _profileImage,
+        );
       }
+
       User user = User(
         id: widget.user.id,
         username: _name,
-        profileImageUrl: _profileImageURL,
+        profileImageUrl: _profileImageUrl,
         bio: _bio,
       );
       // Database update
       DatabaseService.updateUser(user);
+
       Navigator.pop(context);
     }
   }

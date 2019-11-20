@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:say_yes_app/models/user_data.dart';
 import 'package:say_yes_app/pages/edit_profile_page.dart';
 import 'package:say_yes_app/utilities/constants.dart';
 import 'package:say_yes_app/models/user_model.dart';
@@ -17,6 +19,15 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text(
+            'Say YES',
+            style: TextStyle(
+                color: Colors.blueAccent,
+                fontWeight: FontWeight.bold,
+                fontSize: 35.0),
+          )),
       backgroundColor: Colors.white,
       body: FutureBuilder(
         future: usersRef.document(widget.userId).get(),
@@ -93,6 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ],
                           ),
+                          widget.userId == Provider.of<UserData>(context).currentUserId ?
                           Container(
                             width: 200.0,
                             child: FlatButton(
@@ -104,7 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 style: TextStyle(fontSize: 18.0),
                               ),
                             ),
-                          ),
+                          ) : SizedBox.shrink(),
                         ],
                       ),
                     ),

@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:say_yes_app/models/user_data.dart';
 import 'package:say_yes_app/pages/activity_page.dart';
 import 'package:say_yes_app/pages/create_event_page.dart';
 import 'package:say_yes_app/pages/feed_page.dart';
@@ -7,9 +9,6 @@ import 'package:say_yes_app/pages/profile_page.dart';
 import 'package:say_yes_app/pages/search_page.dart';
 
 class HomePage extends StatefulWidget {
-
-  final String userId;
-  HomePage({this.userId});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -28,15 +27,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-            'Say YES',
-            style: TextStyle(
-                color: Colors.blueAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 35.0),
-          )),
       body: PageView(
         controller: _pageController,
         children: <Widget>[
@@ -44,7 +34,7 @@ class _HomePageState extends State<HomePage> {
           SearchPage(),
           CreateEventPage(),
           ActivityPage(),
-          ProfilePage(userId: widget.userId),
+          ProfilePage(userId:  Provider.of<UserData>(context).currentUserId,),
         ],
         onPageChanged: (int index){
           setState(() {

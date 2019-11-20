@@ -12,6 +12,15 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text(
+            'Say YES',
+            style: TextStyle(
+                color: Colors.blueAccent,
+                fontWeight: FontWeight.bold,
+                fontSize: 35.0),
+          )),
       backgroundColor: Colors.blue,
       body: Center(
         child: FlatButton(
