@@ -20,6 +20,11 @@ class DatabaseService{
     return users;
   }
 
+  static Future<QuerySnapshot> getEvent() async {
+    Future<QuerySnapshot> events = eventRef.getDocuments();
+    return events;
+  }
+
   static void createEvent(Event event) {
     eventRef.document(event.id).setData({
       'eventName': event.eventName,

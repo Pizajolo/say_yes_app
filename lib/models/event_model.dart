@@ -26,7 +26,7 @@ class Event {
       hostId: doc['hostId'],
       address: doc['address'],
       location: doc['location'],
-      date: doc['date'],
+      date: doc['date'].toDate(),
       guests: doc['guests'] ?? [doc.documentID],
       guestNumber: doc['guestNumber'],
       active: doc['active'],

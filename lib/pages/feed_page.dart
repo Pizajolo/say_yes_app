@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/services/auth_service.dart';
+import 'package:say_yes_app/services/database_service.dart';
 
 class FeedPage extends StatefulWidget {
   static final String id = 'feed_page';
@@ -15,15 +18,45 @@ class FeedPage extends StatefulWidget {
 
 class _FeedPageState extends State<FeedPage> {
   Completer<GoogleMapController> _controller = Completer();
+  Future<QuerySnapshot> _events;
+  Iterable markers = [];
   double _zoomValue = 12.0;
   double _long;
   double _lat;
 
   @override
-  void initState() {
+  void initState(){
     _getCurrentLocation();
+    _events = DatabaseService.getEvent();
+    _events.then((list) {
+      Iterable _markers = Iterable.generate(list.documents.length, (index) {
+        Event result = Event.fromDoc(list.documents[index]);
+        LatLng latLngMarker = LatLng(
+            result.location.latitude, result.location.longitude);
+        return Marker(
+          markerId: MarkerId(result.id),
+          position: latLngMarker,
+          infoWindow: InfoWindow(title: result.eventName),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueBlue,
+          ),
+        );
+      });
+      setState(() {
+        markers = _markers;
+      });
+    });
     super.initState();
   }
+
+  Marker aachenMarker = Marker(
+    markerId: MarkerId('aachen1'),
+    position: LatLng(50.782, 6.076),
+    infoWindow: InfoWindow(title: 'Hilton'),
+    icon: BitmapDescriptor.defaultMarkerWithHue(
+      BitmapDescriptor.hueBlue,
+    ),
+  );
 
   void _getCurrentLocation() async {
     GeolocationStatus geolocationStatus  = await Geolocator().checkGeolocationPermissionStatus();
@@ -78,99 +111,116 @@ class _FeedPageState extends State<FeedPage> {
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20.0),
         height: 150.0,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            SizedBox(
-              width: 10.0,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _boxes(50.782, 6.07, "Hiton", 200, "Party"),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _boxes(
-                  50.785549, 6.078375, "Big Party to alll", 200, "Party"),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _boxes(
-                  51.782549, 6.076375, "Best Meetup ever", 200, "Meetup"),
-            ),
-          ],
-        ),
+        child: _events == null
+            ? Center(
+          child: Text('Loading events'),
+        )
+            : FutureBuilder(
+            future: _events,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (snapshot.data.documents.length == 0) {
+                return Center(
+                  child: Text('No events found!'),
+                );
+              }
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: snapshot.data.documents.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Event event = Event.fromDoc(snapshot.data.documents[index]);
+                  return _boxes(event);
+                },
+              );
+            })
+
       ),
     );
   }
 
-  Widget _boxes(
-      double lat, double long, String eventName, int price, String type) {
+
+  Widget _boxes(Event event) {
+    double lat = event.location.latitude;
+    double long = event.location.longitude;
+    String eventName = event.eventName;
+    int price = event.price;
+    String type = event.type;
+//    DateTime date = event.date;
     return GestureDetector(
       onTap: () {
         _gotoLocation(lat, long);
       },
-      child: Container(
-          child: new FittedBox(
-              child: Material(
-                  color: Colors.white,
-                  elevation: 14.0,
-                  borderRadius: BorderRadius.circular(24.0),
-                  shadowColor: Colors.transparent,
-                  child: Container(
-                      width: 150.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Container(
-                                child: Text(
-                              eventName,
-                              style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            )),
-                            SizedBox(
-                              height: 5.0,
-                            ),
-                            Container(
-                                child: Text(
-                              type,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14.0,
-                              ),
-                            )),
-                            SizedBox(
-                              height: 5.0,
-                            ),
-                            Container(
-                                child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  price.toString(),
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14.0,
-                                  ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20.0),
+        child: Container(
+            width: 200.0,
+            height: 150.0,
+            child: new FittedBox(
+                child: Material(
+                    color: Colors.white,
+                    elevation: 14.0,
+                    borderRadius: BorderRadius.circular(24.0),
+                    shadowColor: Colors.transparent,
+                    child: Container(
+                        width: 200.0,
+                        height: 150.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              Container(
+                                  child: Text(
+                                eventName,
+                                style: TextStyle(
+                                  color: Colors.blueAccent,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                Text(
-                                  'YC',
-                                  style: TextStyle(
-                                      color: Colors.blueAccent,
+                                textAlign: TextAlign.center,
+                              )),
+                              SizedBox(
+                                height: 5.0,
+                              ),
+                              Container(
+                                  child: Text(
+                                type,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14.0,
+                                ),
+                              )),
+                              SizedBox(
+                                height: 5.0,
+                              ),
+                              Container(
+                                  child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text(
+                                    price.toString(),
+                                    style: TextStyle(
+                                      color: Colors.black,
                                       fontSize: 14.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            )),
-                          ],
-                        ),
-                      ))))),
+                                    ),
+                                  ),
+                                  Text(
+                                    'YC',
+                                    style: TextStyle(
+                                        color: Colors.blueAccent,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              )),
+                            ],
+                          ),
+                        ))))),
+      ),
     );
   }
 
@@ -188,18 +238,12 @@ class _FeedPageState extends State<FeedPage> {
           onMapCreated: (GoogleMapController controller) {
             _controller.complete(controller);
           },
-          markers: {aachenMarker}),
+          markers: Set.from(
+            markers,
+          ),),
     );
   }
 
-  Marker aachenMarker = Marker(
-    markerId: MarkerId('aachen1'),
-    position: LatLng(50.782, 6.076),
-    infoWindow: InfoWindow(title: 'Hilton'),
-    icon: BitmapDescriptor.defaultMarkerWithHue(
-      BitmapDescriptor.hueBlue,
-    ),
-  );
 
   Future<void> _gotoHome() async {
     final GoogleMapController controller = await _controller.future;
