@@ -3,6 +3,8 @@ import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/utilities/constants.dart';
 import 'package:say_yes_app/models/user_model.dart';
 
+//com.example.sayYesApp
+
 class DatabaseService{
 
   static void updateUser(User user) {

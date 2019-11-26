@@ -36,6 +36,8 @@ dependencies:
   provider: ^3.1.0+1
   geopoint: ^0.7.0
   datetime_picker_formfield: ^0.4.3
+  geolocator: ^5.1.5
+  google_maps_flutter: ^0.5.21+12
 
 
 dev_dependencies:

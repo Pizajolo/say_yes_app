@@ -13,6 +13,7 @@ import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/services/storage_service.dart';
 import 'package:say_yes_app/models/user_data.dart';
 import 'package:uuid/uuid.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AddEventPage extends StatefulWidget {
   @override
@@ -23,7 +24,7 @@ class _AddEventPageState extends State<AddEventPage> {
   final _formKey = GlobalKey<FormState>();
   String _eventName;
   String _description;
-  String _type;
+  String _type = 'Meetup';
   String _hostId;
   Map _address;
   String _houseNumber;
@@ -38,32 +39,69 @@ class _AddEventPageState extends State<AddEventPage> {
   bool _active;
   int _price;
   bool _isLoading = false;
+  var _countryController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
   }
 
+  _checkLocation() async{
+    try {
+      _formKey.currentState.save();
+      String address = _street + _houseNumber + ', '+ _city + ', '+ _country;
+      List<Placemark> placemark = await Geolocator().placemarkFromAddress(address, localeIdentifier: 'en');
+      _location = GeoPoint(placemark[0].position.latitude, placemark[0].position.longitude);
+      _country = placemark[0].country;
+      _postcode = placemark[0].postalCode;
+    }
+    catch (e){
+//      _formKey.currentState.validate();
+      _countryController.text = '';
+      _country = '';
+      _formKey.currentState.validate();
+//      print(e);
+    }
+  }
+
   _submit() async {
     if (_formKey.currentState.validate() && !_isLoading) {
       _formKey.currentState.save();
-
-      setState(() {
-        _isLoading = true;
-      });
-      _hostId = Provider.of<UserData>(context).currentUserId;
-      _guests = [Provider.of<UserData>(context).currentUserId];
-      String _eventId = Uuid().v4();
-      _address = {
-        'street': _street,
-        'houseNumber': _houseNumber,
-        'postcode': _postcode,
-        'city': _city,
-        'country': _country,
-      };
-      Event event = new Event(id: _eventId, eventName: _eventName, description: _description, type: _type, hostId: _hostId, address: _address, active: true, price: _price, guestNumber: _guestNumber, guests: _guests, location: _location);
-      DatabaseService.createEvent(event);
-      Navigator.pop(context);
+      await _checkLocation();
+      if (_formKey.currentState.validate()) {
+        setState(() {
+          _isLoading = true;
+        });
+        _hostId = Provider
+            .of<UserData>(context)
+            .currentUserId;
+        _guests = [Provider
+            .of<UserData>(context)
+            .currentUserId
+        ];
+        String _eventId = Uuid().v4();
+        _address = {
+          'street': _street,
+          'houseNumber': _houseNumber,
+          'postcode': _postcode,
+          'city': _city,
+          'country': _country,
+        };
+        Event event = new Event(id: _eventId,
+            eventName: _eventName,
+            description: _description,
+            type: _type,
+            hostId: _hostId,
+            address: _address,
+            active: true,
+            price: _price,
+            guestNumber: _guestNumber,
+            guests: _guests,
+            location: _location,
+            date: _date);
+        DatabaseService.createEvent(event);
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -114,6 +152,34 @@ class _AddEventPageState extends State<AddEventPage> {
                           ? 'Please enter more than 50 characters'
                           : null,
                       onSaved: (input) => _description = input,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: DropdownButton<String>(
+                        value: _type,
+                        elevation: 16,
+                        style: TextStyle(
+                            color: Colors.black,
+                          fontSize: 18.0
+                        ),
+                        underline: Container(
+                          height: 2.0,
+                          color: Colors.black26,
+                        ),
+                        onChanged: (String newValue) {
+                          setState(() {
+                            _type = newValue;
+                          });
+                        },
+                        items: <String>['Meetup', 'Party', 'Dinner', 'Adventure', 'Help me', 'Something else']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        })
+                            .toList(),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 25.0),
@@ -195,13 +261,13 @@ class _AddEventPageState extends State<AddEventPage> {
                             ],
                           ),
                           TextFormField(
-                            initialValue: _country,
+                            controller: _countryController,
                             style: TextStyle(fontSize: 18.0),
                             decoration: InputDecoration(
                               labelText: 'Country',
                             ),
                             validator: (input) => input.trim().length < 1
-                                ? 'Please enter a valid country name'
+                                ? 'Address is not correct / could not be found /  check all address fields'
                                 : null,
                             onSaved: (input) => _country = input,
                           ),
@@ -231,7 +297,7 @@ class _AddEventPageState extends State<AddEventPage> {
                           return currentValue;
                         }
                       },
-                      onSaved: (input) => _date,
+                      onSaved: (input) => _date = input,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
