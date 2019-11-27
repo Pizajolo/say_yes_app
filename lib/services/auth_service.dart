@@ -8,6 +8,8 @@ import 'package:say_yes_app/pages/feed_page.dart';
 import 'package:say_yes_app/pages/home_page.dart';
 import 'package:say_yes_app/pages/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:say_yes_app/utilities/constants.dart';
+import 'package:say_yes_app/utilities/globals.dart' as globals;
 
 class AuthService{
 
@@ -35,6 +37,12 @@ class AuthService{
           'yesCoins': 200,
         });
         Provider.of<UserData>(context).currentUserId = signedInUser.uid;
+        usersRef.document(signedInUser.uid).get().then((doc) {
+          User user = User.fromDoc(doc);
+          globals.yesCoins = user.yesCoins;
+          globals.authenticated = user.authenticated;
+          globals.yeses = user.yeses;
+        });
         Navigator.pop(context);
 //        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
       }
@@ -53,6 +61,12 @@ class AuthService{
       AuthResult authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser signedInUser = authResult.user;
       Provider.of<UserData>(context).currentUserId = signedInUser.uid;
+      usersRef.document(signedInUser.uid).get().then((doc){
+        User user = User.fromDoc(doc);
+        globals.yesCoins = user.yesCoins;
+        globals.authenticated = user.authenticated;
+        globals.yeses = user.yeses;
+      });
 //      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
     } catch (e) {
       print(e);

@@ -12,6 +12,7 @@ import 'package:say_yes_app/pages/event_page.dart';
 import 'package:say_yes_app/services/auth_service.dart';
 import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/utilities/constants.dart';
+import 'package:say_yes_app/utilities/globals.dart' as globals;
 
 class FeedPage extends StatefulWidget {
   static final String id = 'feed_page';
@@ -122,12 +123,54 @@ class _FeedPageState extends State<FeedPage> {
                 fontWeight: FontWeight.bold,
                 fontSize: 30.0),
           ),
+          leading: Padding(
+            padding: const EdgeInsets.only(left:12.0, top: 12.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  globals.yesCoins == null ? '0' : globals.yesCoins.toString(),
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black54,
+                  ),
+                ),
+                Text(
+                  'YC',
+                  style: TextStyle(color: Colors.blueAccent,fontWeight: FontWeight.bold, fontSize: 12.0),
+                ),
+              ],
+            ),
+          ),
           actions: <Widget>[
-            IconButton(
-              color: Colors.blueAccent,
-              icon: Icon(Icons.lock),
-              onPressed: () => AuthService.logout(context),
-            )
+            Row(
+              children: <Widget>[
+                IconButton(
+                  color: Colors.blueAccent,
+                  icon: Icon(Icons.lock),
+                  onPressed: () => AuthService.logout(context),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0, top: 12.0),
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        globals.yeses == null ? '0' : globals.yeses.toString(),
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      Text(
+                        'YESes',
+                        style: TextStyle(color: Colors.blueAccent,fontWeight: FontWeight.bold, fontSize: 12.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         body: Column(

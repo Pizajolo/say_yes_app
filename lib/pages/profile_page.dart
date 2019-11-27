@@ -8,6 +8,7 @@ import 'package:say_yes_app/models/user_data.dart';
 import 'package:say_yes_app/pages/edit_profile_page.dart';
 import 'package:say_yes_app/utilities/constants.dart';
 import 'package:say_yes_app/models/user_model.dart';
+import 'package:say_yes_app/utilities/globals.dart' as globals;
 
 
 class ProfilePage extends StatefulWidget {
@@ -26,20 +27,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    _yeses = 0;
-    int _yesCoins = 0;
+    _yesCoins = globals.yesCoins;
+    _yeses = globals.yeses;
     super.initState();
   }
 
-  _update(){
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
+//  _update(){
+//    if (this.mounted) {
+//      setState(() {});
+//    }
+//  }
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.userId == Provider.of<UserData>(context).currentUserId? AppBar(
           backgroundColor: Colors.white,
           title: Text(
             'Say YES',
@@ -88,6 +89,15 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ],
+      ) : AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Say YES',
+          style: TextStyle(
+              color: Colors.blueAccent,
+              fontWeight: FontWeight.bold,
+              fontSize: 30.0),
+        ),
       ),
       backgroundColor: Colors.white,
       body: FutureBuilder(
@@ -97,10 +107,9 @@ class _ProfilePageState extends State<ProfilePage> {
             return Center(child: CircularProgressIndicator(),);
           }
           User user = User.fromDoc(snapshot.data);
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => _update());
-          _yeses = user.yeses;
-          _yesCoins = user.yesCoins;
+          globals.yesCoins = user.yesCoins;
+          globals.authenticated = user.authenticated;
+          globals.yeses = user.yeses;
           return ListView(
             children: <Widget>[
               Padding(

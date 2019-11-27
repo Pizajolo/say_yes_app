@@ -12,6 +12,8 @@ class DatabaseService{
       'username': user.username,
       'profileImageUrl': user.profileImageUrl,
       'bio': user.bio,
+      'organized': user.organized,
+      'participated': user.participated
     });
   }
 

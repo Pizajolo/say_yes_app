@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/models/user_model.dart';
+import 'package:say_yes_app/pages/event_page.dart';
 import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/services/storage_service.dart';
 import 'package:say_yes_app/models/user_data.dart';
@@ -99,8 +100,9 @@ class _AddEventPageState extends State<AddEventPage> {
             guests: _guests,
             location: _location,
             date: _date);
-        DatabaseService.createEvent(event);
-        Navigator.pop(context);
+//        DatabaseService.createEvent(event);
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: event,)));
+//        Navigator.pop(context);
       }
     }
   }
