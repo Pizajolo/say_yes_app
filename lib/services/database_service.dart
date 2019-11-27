@@ -20,9 +20,14 @@ class DatabaseService{
     return users;
   }
 
-  static Future<QuerySnapshot> getEvent() async {
+  static Future<QuerySnapshot> getEvents() async {
     Future<QuerySnapshot> events = eventRef.getDocuments();
     return events;
+  }
+
+  static Future<DocumentSnapshot> getEvent(String id) async {
+    Future<DocumentSnapshot> event = eventRef.document(id).get();
+    return event;
   }
 
   static void createEvent(Event event) {

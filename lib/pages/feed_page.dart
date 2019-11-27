@@ -6,8 +6,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/event_model.dart';
+import 'package:say_yes_app/pages/event_page.dart';
 import 'package:say_yes_app/services/auth_service.dart';
 import 'package:say_yes_app/services/database_service.dart';
+import 'package:say_yes_app/utilities/constants.dart';
 
 class FeedPage extends StatefulWidget {
   static final String id = 'feed_page';
@@ -27,13 +29,16 @@ class _FeedPageState extends State<FeedPage> {
   @override
   void initState(){
     _getCurrentLocation();
-    _events = DatabaseService.getEvent();
+    _events = DatabaseService.getEvents();
     _events.then((list) {
       Iterable _markers = Iterable.generate(list.documents.length, (index) {
         Event result = Event.fromDoc(list.documents[index]);
         LatLng latLngMarker = LatLng(
             result.location.latitude, result.location.longitude);
         return Marker(
+          onTap: (){
+            _openEvent(result.id);
+          },
           markerId: MarkerId(result.id),
           position: latLngMarker,
           infoWindow: InfoWindow(title: result.eventName),
@@ -49,14 +54,14 @@ class _FeedPageState extends State<FeedPage> {
     super.initState();
   }
 
-  Marker aachenMarker = Marker(
-    markerId: MarkerId('aachen1'),
-    position: LatLng(50.782, 6.076),
-    infoWindow: InfoWindow(title: 'Hilton'),
-    icon: BitmapDescriptor.defaultMarkerWithHue(
-      BitmapDescriptor.hueBlue,
-    ),
-  );
+  _openEvent(eventId) {
+    eventRef.document(eventId).get().then((event){
+      if(event.data != null){
+        Event ev = Event.fromDoc(event);
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: ev,)));
+      }
+    });
+  }
 
   void _getCurrentLocation() async {
     GeolocationStatus geolocationStatus  = await Geolocator().checkGeolocationPermissionStatus();
