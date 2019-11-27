@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/user_data.dart';
 import 'package:say_yes_app/pages/edit_profile_page.dart';
 import 'package:say_yes_app/utilities/constants.dart';
 import 'package:say_yes_app/models/user_model.dart';
+
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -15,8 +19,24 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
+
 class _ProfilePageState extends State<ProfilePage> {
+  int _yeses;
+  int _yesCoins;
+
   @override
+  void initState() {
+    _yeses = 0;
+    int _yesCoins = 0;
+    super.initState();
+  }
+
+  _update(){
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +47,48 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.bold,
                 fontSize: 30.0),
-          )),
+          ),
+        leading: Padding(
+          padding: const EdgeInsets.only(left:12.0, top: 12.0),
+          child: Column(
+            children: <Widget>[
+              Text(
+                _yesCoins == null ? '0' : _yesCoins.toString(),
+                style: TextStyle(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black54,
+                ),
+              ),
+              Text(
+                'YC',
+                style: TextStyle(color: Colors.blueAccent,fontWeight: FontWeight.bold, fontSize: 12.0),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  _yeses == null ? '0' : _yeses.toString(),
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black54,
+                  ),
+                ),
+                Text(
+                  'YESes',
+                  style: TextStyle(color: Colors.blueAccent,fontWeight: FontWeight.bold, fontSize: 12.0),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       backgroundColor: Colors.white,
       body: FutureBuilder(
         future: usersRef.document(widget.userId).get(),
@@ -36,9 +97,10 @@ class _ProfilePageState extends State<ProfilePage> {
             return Center(child: CircularProgressIndicator(),);
           }
           User user = User.fromDoc(snapshot.data);
-          print(user.username);
-          print(user.email);
-          print(user.bio);
+          WidgetsBinding.instance
+              .addPostFrameCallback((_) => _update());
+          _yeses = user.yeses;
+          _yesCoins = user.yesCoins;
           return ListView(
             children: <Widget>[
               Padding(
@@ -60,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               Column(
                                 children: <Widget>[
                                   Text(
-                                    '12',
+                                    user.participated.length.toString(),
                                     style: TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w600,
@@ -75,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               Column(
                                 children: <Widget>[
                                   Text(
-                                    '20',
+                                    user.organized.length.toString(),
                                     style: TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w600,
@@ -90,14 +152,14 @@ class _ProfilePageState extends State<ProfilePage> {
                               Column(
                                 children: <Widget>[
                                   Text(
-                                    '10234',
+                                    user.yeses.toString(),
                                     style: TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   Text(
-                                    'YES',
+                                    'YESes',
                                     style: TextStyle(color: Colors.black54),
                                   ),
                                 ],
@@ -124,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 1.0),
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/user_data.dart';
+import 'package:say_yes_app/models/user_model.dart';
 import 'package:say_yes_app/pages/feed_page.dart';
 import 'package:say_yes_app/pages/home_page.dart';
 import 'package:say_yes_app/pages/login_page.dart';
@@ -13,15 +14,25 @@ class AuthService{
   static final _auth = FirebaseAuth.instance;
   static final _firestore = Firestore.instance;
 
-  static void signUpUser(BuildContext context, String name, String email, String password) async{
+  static void signUpUser(BuildContext context, String username,String firstName, String surname, String email, String password, Map address, ) async{
     try{
       AuthResult authResult = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       FirebaseUser signedInUser = authResult.user;
       if (signedInUser != null){
         _firestore.collection('/users').document(signedInUser.uid).setData({
-          'username': name,
+          'username': username,
+          'firstName': firstName,
+          'surname': surname,
           'email': email,
+          'bio': '',
           'profileImageUrl': '',
+          'address': address,
+          'phoneNumber': '',
+          'authenticated': true,
+          'participated': [],
+          'organized': [],
+          'yeses': 0,
+          'yesCoins': 200,
         });
         Provider.of<UserData>(context).currentUserId = signedInUser.uid;
         Navigator.pop(context);
@@ -41,6 +52,7 @@ class AuthService{
     try {
       AuthResult authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser signedInUser = authResult.user;
+      Provider.of<UserData>(context).currentUserId = signedInUser.uid;
 //      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage(userId: signedInUser.uid)));
     } catch (e) {
       print(e);

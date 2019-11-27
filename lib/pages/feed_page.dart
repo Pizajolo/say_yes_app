@@ -6,6 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/event_model.dart';
+import 'package:say_yes_app/models/user_data.dart';
+import 'package:say_yes_app/models/user_model.dart';
 import 'package:say_yes_app/pages/event_page.dart';
 import 'package:say_yes_app/services/auth_service.dart';
 import 'package:say_yes_app/services/database_service.dart';
@@ -25,11 +27,21 @@ class _FeedPageState extends State<FeedPage> {
   double _zoomValue = 12.0;
   double _long;
   double _lat;
+  String _city;
+  User _user;
+
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState(){
     _getCurrentLocation();
-    _events = DatabaseService.getEvents();
+    _createMarkers();
+    super.initState();
+  }
+
+
+  _createMarkers() async {
+    _events = DatabaseService.getEvents(_city);
     _events.then((list) {
       Iterable _markers = Iterable.generate(list.documents.length, (index) {
         Event result = Event.fromDoc(list.documents[index]);
@@ -51,7 +63,6 @@ class _FeedPageState extends State<FeedPage> {
         markers = _markers;
       });
     });
-    super.initState();
   }
 
   _openEvent(eventId) {
@@ -78,6 +89,25 @@ class _FeedPageState extends State<FeedPage> {
       _long = 6.078375;
       _gotoHome();
     }
+    List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(_lat, _long);
+    _city = placemark[0].locality;
+  }
+
+  _clearSearch() {
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _searchController.clear());
+  }
+
+  _searchCity(String name) async {
+    List<Placemark> res = await Geolocator().placemarkFromAddress(name);
+    setState(() {
+      _city = res[0].locality;
+      _lat = res[0].position.latitude;
+      _long = res[0].position.longitude;
+      _zoomValue = 12;
+      _createMarkers();
+      _gotoHome();
+    });
   }
 
   @override
@@ -100,12 +130,47 @@ class _FeedPageState extends State<FeedPage> {
             )
           ],
         ),
-        body: Stack(
+        body: Column(
           children: <Widget>[
-            _GoogleMap(context),
-            _BuildContainer(context),
-            _zoomMinusFunction(),
-            _zoomPlusFunction(),
+            SizedBox(
+              height: 49.0,
+              width: MediaQuery.of(context).size.width,
+              child: TextField(
+              controller: _searchController,
+                decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 15.0),
+                    border: InputBorder.none,
+                    hintText: 'Search City',
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 30.0,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear,
+                      ),
+                    onPressed: _clearSearch,
+                    ),
+                    filled: true),
+                onSubmitted: (input) {
+                  if (input.isNotEmpty) {
+                    _searchCity(input);
+                  }
+                },
+              ),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height-233,
+              width: MediaQuery.of(context).size.width,
+              child: Stack(
+                children: <Widget>[
+                  _GoogleMap(context),
+                  _BuildContainer(context),
+                  _zoomMinusFunction(),
+                  _zoomPlusFunction(),
+                ],
+              ),
+            ),
           ],
         ));
   }
@@ -231,7 +296,7 @@ class _FeedPageState extends State<FeedPage> {
 
   Widget _GoogleMap(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height-233,
       width: MediaQuery.of(context).size.width,
       child: GoogleMap(
           myLocationEnabled: true,

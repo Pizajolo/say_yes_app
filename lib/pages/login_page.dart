@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Text('SAY YES',
-                style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
             Form(
               key: _formKey,
               child: Column(

@@ -1,19 +1,5 @@
-import 'dart:io';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/event_model.dart';
-import 'package:say_yes_app/models/user_model.dart';
-import 'package:say_yes_app/services/database_service.dart';
-import 'package:say_yes_app/services/storage_service.dart';
-import 'package:say_yes_app/models/user_data.dart';
-import 'package:uuid/uuid.dart';
-import 'package:geolocator/geolocator.dart';
 
 class EventPage extends StatefulWidget {
   final Event event;
@@ -33,6 +19,16 @@ class _EventPageState extends State<EventPage> {
   }
 
   _submit() async {
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      Navigator.pop(context);
+    }
+  }
+
+  _close() async {
     if (!_isLoading) {
       Navigator.pop(context);
     }
@@ -234,7 +230,7 @@ class _EventPageState extends State<EventPage> {
                         SizedBox(
                           width: 150.0,
                           child: FlatButton(
-                            onPressed: _submit,
+                            onPressed: _close,
                             color: Colors.blueAccent,
                             textColor: Colors.white,
                             child: Text(
