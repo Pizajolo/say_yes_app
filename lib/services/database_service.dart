@@ -30,6 +30,21 @@ class DatabaseService{
     return event;
   }
 
+//  static Future<List<DocumentSnapshot>> getUserEvents(List participated, List organized) async {
+//    Future<List<DocumentSnapshot>> events;
+//    print("1");
+//    for(int i = 0; i < participated.length; i++){
+//      Future<DocumentSnapshot> event = eventRef.document(participated[i]).get();
+//      events.add(event);
+//    }
+//    for(int i = 0; i < organized.length; i++){
+//      Future<DocumentSnapshot> event = eventRef.document(organized[i]).get();
+//      events.add(event);
+//    }
+//    print("3");
+//    return events;
+//  }
+
   static void updateEvent(String eventId, List guests, String userId, List participated) {
     usersRef.document(userId).updateData({
       'participated': participated,
