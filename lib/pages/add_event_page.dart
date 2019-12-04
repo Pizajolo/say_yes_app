@@ -11,8 +11,10 @@ import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/models/user_model.dart';
 import 'package:say_yes_app/pages/event_page.dart';
 import 'package:say_yes_app/services/database_service.dart';
+import 'package:say_yes_app/services/database_service.dart' as prefix0;
 import 'package:say_yes_app/services/storage_service.dart';
 import 'package:say_yes_app/models/user_data.dart';
+import 'package:say_yes_app/utilities/constants.dart';
 import 'package:uuid/uuid.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -39,7 +41,7 @@ class _AddEventPageState extends State<AddEventPage> {
   int _guestNumber;
   bool _active;
   int _price;
-  bool _isLoading = false;
+//  bool _isLoading = false;
   var _countryController = TextEditingController();
 
   @override
@@ -66,13 +68,13 @@ class _AddEventPageState extends State<AddEventPage> {
   }
 
   _submit() async {
-    if (_formKey.currentState.validate() && !_isLoading) {
+    if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       await _checkLocation();
       if (_formKey.currentState.validate()) {
-        setState(() {
-          _isLoading = true;
-        });
+//        setState(() {
+//          _isLoading = true;
+//        });
         _hostId = Provider
             .of<UserData>(context)
             .currentUserId;
@@ -88,7 +90,8 @@ class _AddEventPageState extends State<AddEventPage> {
           'city': _city,
           'country': _country,
         };
-        Event event = new Event(id: _eventId,
+        Event event = new Event(
+            id: _eventId,
             eventName: _eventName,
             description: _description,
             type: _type,
@@ -100,8 +103,7 @@ class _AddEventPageState extends State<AddEventPage> {
             guests: _guests,
             location: _location,
             date: _date);
-//        DatabaseService.createEvent(event);
-        Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: event,)));
+          Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: event, join: false,)));
 //        Navigator.pop(context);
       }
     }
@@ -119,12 +121,12 @@ class _AddEventPageState extends State<AddEventPage> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: ListView(
           children: <Widget>[
-            _isLoading
-                ? LinearProgressIndicator(
-                    backgroundColor: Colors.black,
-                    valueColor: AlwaysStoppedAnimation(Colors.blueAccent),
-                  )
-                : SizedBox.shrink(),
+//            _isLoading
+//                ? LinearProgressIndicator(
+//                    backgroundColor: Colors.black,
+//                    valueColor: AlwaysStoppedAnimation(Colors.blueAccent),
+//                  )
+//                : SizedBox.shrink(),
             Padding(
               padding: const EdgeInsets.all(30.0),
               child: Form(

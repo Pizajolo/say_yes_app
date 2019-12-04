@@ -70,7 +70,7 @@ class _FeedPageState extends State<FeedPage> {
     eventRef.document(eventId).get().then((event){
       if(event.data != null){
         Event ev = Event.fromDoc(event);
-        Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: ev,)));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: ev, join: true,)));
       }
     });
   }

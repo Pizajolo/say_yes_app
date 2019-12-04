@@ -12,8 +12,6 @@ class DatabaseService{
       'username': user.username,
       'profileImageUrl': user.profileImageUrl,
       'bio': user.bio,
-      'organized': user.organized,
-      'participated': user.participated
     });
   }
 
@@ -32,13 +30,19 @@ class DatabaseService{
     return event;
   }
 
-  static void updateEvent(Event event) {
-    usersRef.document(event.id).updateData({
-      'guests': event.guests,
+  static void updateEvent(String eventId, List guests, String userId, List participated) {
+    usersRef.document(userId).updateData({
+      'participated': participated,
+    });
+    eventRef.document(eventId).updateData({
+      'guests': guests,
     });
   }
 
-  static void createEvent(Event event) {
+  static void createEvent(Event event, List organized) {
+    usersRef.document(event.hostId).updateData({
+      'organized': organized,
+    });
     eventRef.document(event.id).setData({
       'eventName': event.eventName,
       'description': event.description,
