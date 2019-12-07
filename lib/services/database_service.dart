@@ -30,6 +30,11 @@ class DatabaseService{
     return event;
   }
 
+  static Stream<QuerySnapshot> getActivities(String userId) {
+    Stream<QuerySnapshot> activities = usersRef.document(userId).collection('activities').orderBy("date", descending: true ).limit(10).snapshots();
+    return activities;
+  }
+
 //  static Future<List<DocumentSnapshot>> getUserEvents(List participated, List organized) async {
 //    Future<List<DocumentSnapshot>> events;
 //    print("1");

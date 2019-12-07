@@ -36,7 +36,7 @@ class _FeedPageState extends State<FeedPage> {
   @override
   void initState(){
     _getCurrentLocation();
-    _createMarkers();
+//    _createMarkers();
     super.initState();
   }
 
@@ -56,7 +56,7 @@ class _FeedPageState extends State<FeedPage> {
           position: latLngMarker,
           infoWindow: InfoWindow(title: result.eventName),
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue,
+            BitmapDescriptor.hueAzure,
           ),
         );
       });
@@ -77,12 +77,11 @@ class _FeedPageState extends State<FeedPage> {
 
   void _getCurrentLocation() async {
     GeolocationStatus geolocationStatus  = await Geolocator().checkGeolocationPermissionStatus();
-    if(geolocationStatus.toString() == 'granted'){
+    if(geolocationStatus.toString() == 'GeolocationStatus.granted'){
       Position res = await Geolocator().getCurrentPosition();
       setState(() {
         _lat = res.latitude;
         _long = res.longitude;
-        _gotoHome();
       });
     }
     else{
@@ -92,6 +91,7 @@ class _FeedPageState extends State<FeedPage> {
     }
     List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(_lat, _long);
     _city = placemark[0].locality;
+    _searchCity(_city);
   }
 
   _clearSearch() {
@@ -338,6 +338,11 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Widget _GoogleMap(BuildContext context) {
+    if(_city == null){
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return Container(
       height: MediaQuery.of(context).size.height-233,
       width: MediaQuery.of(context).size.width,

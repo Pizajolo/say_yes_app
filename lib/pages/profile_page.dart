@@ -261,13 +261,13 @@ class _ProfilePageState extends State<ProfilePage> {
     for (int i = 0; i < user.participated.length; i++) {
       await eventRef.document(user.participated[i]).get().then((doc) {
         Event event = Event.fromDoc(doc);
-        events.add(event);
+        events[i] = event;
       });
     }
     for (int i = 0; i < user.organized.length; i++) {
       await eventRef.document(user.organized[i]).get().then((doc) {
         Event event = Event.fromDoc(doc);
-        events[i] = event;
+        events[i+user.participated.length] = event;
       });
     }
     setState(() {
@@ -279,11 +279,19 @@ class _ProfilePageState extends State<ProfilePage> {
     List<Widget> feed = [SizedBox.shrink()];
     _events.sort((b, a) => a.date.compareTo(b.date));
     for (Event event in _events) {
-      int value = event.price * (event.guests.length - 1);
+      int value;
+      var color;
+      if(event.hostId==Provider.of<UserData>(context).currentUserId){
+        value = event.price * (event.guests.length - 1);
+        color = Colors.blueAccent;
+      } else {
+        value = event.price;
+        color = Colors.lightBlueAccent;
+      }
       feed.add(
         Container(
           height: 150,
-          color: event.hostId==Provider.of<UserData>(context).currentUserId ? Colors.blueAccent : Colors.lightBlueAccent,
+          color: color,
           child: Column(
             children: <Widget>[
               Row(
