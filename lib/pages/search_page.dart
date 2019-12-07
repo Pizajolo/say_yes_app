@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/user_data.dart';
 import 'package:say_yes_app/models/user_model.dart';
+import 'package:say_yes_app/pages/chat_page.dart';
 import 'package:say_yes_app/pages/profile_page.dart';
 import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/utilities/constants.dart';
@@ -27,17 +28,16 @@ class _SearchPageState extends State<SearchPage> {
         ),
         title: Text(user.username),
         onTap: () => {
-              if (user.id != Provider.of<UserData>(context).currentUserId)
-                {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProfilePage(
-                        userId: user.id,
+              user.id != Provider.of<UserData>(context).currentUserId
+                  ? Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProfilePage(
+                          userId: user.id,
+                        ),
                       ),
-                    ),
-                  ),
-                },
+                    )
+                  : {},
             });
   }
 
@@ -121,8 +121,25 @@ class _SearchPageState extends State<SearchPage> {
           } else {
             return ListView.builder(
               padding: EdgeInsets.all(10.0),
-              itemBuilder: (context, index) =>
-                  buildItem(context, snapshot.data.documents[index], index),
+              itemBuilder: (context, index) {
+                return StreamBuilder(
+                    stream: usersRef
+                        .document(
+                            snapshot.data.documents[index]['users'][0]['id'])
+                        .snapshots(),
+                    builder: (context, snapshot2) {
+                      if (!snapshot2.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else {
+                        String ImageUrl = snapshot2.data['profileImageUrl'];
+                        return buildItem(context, snapshot.data.documents[index], ImageUrl);
+                      }
+                    });
+              },
+//              itemBuilder: (context, index) =>
+//                  buildItem(context, snapshot.data.documents[index]),
               itemCount: snapshot.data.documents.length,
             );
           }
@@ -131,14 +148,14 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget buildItem(BuildContext context, DocumentSnapshot document, int index) {
+  Widget buildItem(BuildContext context, DocumentSnapshot document, String ImageUrl) {
 //    print(document['users'][index]['photoUrl']);
     return Container(
       child: FlatButton(
         child: Row(
           children: <Widget>[
             Material(
-              child: document['photoUrl'] == null
+              child: ImageUrl != null
                   ? CachedNetworkImage(
                       placeholder: (context, url) => Container(
                         child: CircularProgressIndicator(
@@ -148,7 +165,7 @@ class _SearchPageState extends State<SearchPage> {
                         height: 50.0,
                         padding: EdgeInsets.all(15.0),
                       ),
-                      imageUrl: document['users'][index]['photoUrl'],
+                      imageUrl: ImageUrl,
                       width: 50.0,
                       height: 50.0,
                       fit: BoxFit.cover,
@@ -167,7 +184,7 @@ class _SearchPageState extends State<SearchPage> {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        document['users'][index]['username'],
+                        document['users'][0]['username'],
                         style: TextStyle(fontSize: 18.0),
                       ),
                       alignment: Alignment.centerLeft,
@@ -181,13 +198,17 @@ class _SearchPageState extends State<SearchPage> {
           ],
         ),
         onPressed: () {
-//            Navigator.push(
-//                context,
-//                MaterialPageRoute(
-//                    builder: (context) => Chat(
-//                      peerId: document.documentID,
-//                      peerAvatar: document['photoUrl'],
-//                    )));
+          Map writer = {
+            'id': Provider.of<UserData>(context).currentUserId,
+            'username': document['username'],
+          };
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                      chatId: document['chatId'],
+                      receivers: document['users'],
+                      writer: writer)));
         },
         color: Colors.blueAccent,
         padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),

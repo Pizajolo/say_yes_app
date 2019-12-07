@@ -8,11 +8,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/models/user_data.dart';
+import 'package:say_yes_app/pages/chat_page.dart';
 import 'package:say_yes_app/pages/edit_profile_page.dart';
 import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/utilities/constants.dart';
 import 'package:say_yes_app/models/user_model.dart';
 import 'package:say_yes_app/utilities/globals.dart' as globals;
+import 'package:uuid/uuid.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -27,6 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
   int _yeses;
   int _yesCoins;
   List<Event> _events = [];
+  User _user;
 
   @override
   void initState() {
@@ -110,6 +113,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontWeight: FontWeight.bold,
                     fontSize: 30.0),
               ),
+              actions: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: new IconButton(
+                    icon: new Icon(Icons.message),
+                    onPressed: () => _creatNewChat(),
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ],
             ),
       backgroundColor: Colors.white,
       body: FutureBuilder(
@@ -121,6 +134,7 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
           User user = User.fromDoc(snapshot.data);
+          _user = user;
           globals.yesCoins = user.yesCoins;
           globals.authenticated = user.authenticated;
           globals.yeses = user.yeses;
@@ -267,7 +281,7 @@ class _ProfilePageState extends State<ProfilePage> {
     for (int i = 0; i < user.organized.length; i++) {
       await eventRef.document(user.organized[i]).get().then((doc) {
         Event event = Event.fromDoc(doc);
-        events[i+user.participated.length] = event;
+        events[i + user.participated.length] = event;
       });
     }
     setState(() {
@@ -281,7 +295,7 @@ class _ProfilePageState extends State<ProfilePage> {
     for (Event event in _events) {
       int value;
       var color;
-      if(event.hostId==Provider.of<UserData>(context).currentUserId){
+      if (event.hostId == widget.userId) {
         value = event.price * (event.guests.length - 1);
         color = Colors.blueAccent;
       } else {
@@ -386,5 +400,43 @@ class _ProfilePageState extends State<ProfilePage> {
       );
     }
     return feed;
+  }
+
+  _creatNewChat() async{
+    var doc = await usersRef.document(Provider.of<UserData>(context).currentUserId).get();
+    User user = User.fromDoc(doc);
+    Map writer = {
+      'username': user.username,
+      'id': Provider.of<UserData>(context).currentUserId
+    };
+    List<Map> receiver = [{
+      'username': _user.username,
+      'id': widget.userId
+    }];
+    usersRef
+        .document(Provider.of<UserData>(context).currentUserId)
+        .collection('chats')
+        .where('users', isEqualTo: receiver)
+        .getDocuments()
+        .then((docs) {
+      if (docs.documents.isEmpty) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatPage(
+                    chatId: Uuid().v4(),
+                    receivers: receiver,
+                    writer: writer)));
+      } else {
+        var doc = docs.documents[0];
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatPage(
+                    chatId: doc['chatId'],
+                    writer: writer,
+                    receivers: doc['users'])));
+      }
+    });
   }
 }

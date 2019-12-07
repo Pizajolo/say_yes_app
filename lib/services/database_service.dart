@@ -46,21 +46,6 @@ class DatabaseService{
     });
   }
 
-//  static Future<List<DocumentSnapshot>> getUserEvents(List participated, List organized) async {
-//    Future<List<DocumentSnapshot>> events;
-//    print("1");
-//    for(int i = 0; i < participated.length; i++){
-//      Future<DocumentSnapshot> event = eventRef.document(participated[i]).get();
-//      events.add(event);
-//    }
-//    for(int i = 0; i < organized.length; i++){
-//      Future<DocumentSnapshot> event = eventRef.document(organized[i]).get();
-//      events.add(event);
-//    }
-//    print("3");
-//    return events;
-//  }
-
   static void updateEvent(String eventId, List guests, String userId, List participated) {
     usersRef.document(userId).updateData({
       'participated': participated,
@@ -87,5 +72,36 @@ class DatabaseService{
       'active': event.active,
       'price': event.price,
     });
+  }
+
+  static void sendMessage(DateTime date, List receiver, String text, Map writer, String chatId, String messageId) {
+    var documentReference = Firestore.instance
+        .collection('chats')
+        .document(chatId)
+        .collection('messages');
+    documentReference.document(messageId).setData({
+      'date': date,
+      'receiver': receiver,
+      'text': text,
+      'writer': writer,
+    });
+    usersRef.document(writer['id']).collection('chats').document(chatId).setData({
+      'username': writer['username'],
+      'date': date,
+      'chatId': chatId,
+      'users': receiver
+    });
+    for (Map user in receiver) {
+      List users = [];
+      users.addAll(receiver);
+      users.removeWhere((item) => item == user);
+      users.add(writer);
+      usersRef.document(user['id']).collection('chats').document(chatId).setData({
+        'username': user['username'],
+        'date': date,
+        'chatId': chatId,
+        'users': users
+      });
+    }
   }
 }
