@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:say_yes_app/models/activity_model.dart';
 import 'package:say_yes_app/models/event_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:say_yes_app/models/user_data.dart';
@@ -8,6 +9,7 @@ import 'package:say_yes_app/pages/create_event_page.dart';
 import 'package:say_yes_app/pages/home_page.dart';
 import 'package:say_yes_app/services/database_service.dart';
 import 'package:say_yes_app/utilities/constants.dart';
+import 'package:uuid/uuid.dart';
 
 class EventPage extends StatefulWidget {
   final Event event;
@@ -46,6 +48,24 @@ class _EventPageState extends State<EventPage> {
         DatabaseService.updateEvent(widget.event.id, guests,
             Provider.of<UserData>(context).currentUserId, participated);
       });
+      Activity activityHost = new Activity(
+        id: Uuid().v4(),
+        date: DateTime.now(),
+        type: "Joined",
+        title: widget.event.eventName,
+        eventId: widget.event.id,
+      );
+      DatabaseService.createActivity(activityHost, widget.event.hostId);
+
+      Activity activityPart = new Activity(
+        id: Uuid().v4(),
+        date: DateTime.now(),
+        type: "I joined",
+        title: widget.event.eventName,
+        eventId: widget.event.id,
+      );
+      DatabaseService.createActivity(activityPart, Provider.of<UserData>(context).currentUserId);
+
       Navigator.pop(context);
     }
   }
@@ -65,6 +85,14 @@ class _EventPageState extends State<EventPage> {
         DatabaseService.createEvent(widget.event, organized);
         Navigator.pop(context);
       });
+      Activity activityHost = new Activity(
+        id: Uuid().v4(),
+        date: DateTime.now(),
+        type: "Created",
+        title: widget.event.eventName,
+        eventId: widget.event.id,
+      );
+      DatabaseService.createActivity(activityHost, widget.event.hostId);
       Navigator.pop(context);
     }
   }
@@ -323,7 +351,8 @@ class _EventPageState extends State<EventPage> {
   }
 
   Widget _joinButton(BuildContext context) {
-    if(widget.event.guests.contains(Provider.of<UserData>(context).currentUserId)){
+    if (widget.event.guests
+        .contains(Provider.of<UserData>(context).currentUserId)) {
       return SizedBox.shrink();
     }
     return SizedBox(

@@ -34,22 +34,21 @@ class _FeedPageState extends State<FeedPage> {
   TextEditingController _searchController = TextEditingController();
 
   @override
-  void initState(){
+  void initState() {
     _getCurrentLocation();
 //    _createMarkers();
     super.initState();
   }
-
 
   _createMarkers() async {
     _events = DatabaseService.getEvents(_city);
     _events.then((list) {
       Iterable _markers = Iterable.generate(list.documents.length, (index) {
         Event result = Event.fromDoc(list.documents[index]);
-        LatLng latLngMarker = LatLng(
-            result.location.latitude, result.location.longitude);
+        LatLng latLngMarker =
+            LatLng(result.location.latitude, result.location.longitude);
         return Marker(
-          onTap: (){
+          onTap: () {
             _openEvent(result.id);
           },
           markerId: MarkerId(result.id),
@@ -67,29 +66,36 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   _openEvent(eventId) {
-    eventRef.document(eventId).get().then((event){
-      if(event.data != null){
+    eventRef.document(eventId).get().then((event) {
+      if (event.data != null) {
         Event ev = Event.fromDoc(event);
-        Navigator.push(context, MaterialPageRoute(builder: (_) => EventPage(event: ev, join: true,)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => EventPage(
+                      event: ev,
+                      join: true,
+                    )));
       }
     });
   }
 
   void _getCurrentLocation() async {
-    GeolocationStatus geolocationStatus  = await Geolocator().checkGeolocationPermissionStatus();
-    if(geolocationStatus.toString() == 'GeolocationStatus.granted'){
+    GeolocationStatus geolocationStatus =
+        await Geolocator().checkGeolocationPermissionStatus();
+    if (geolocationStatus.toString() == 'GeolocationStatus.granted') {
       Position res = await Geolocator().getCurrentPosition();
       setState(() {
         _lat = res.latitude;
         _long = res.longitude;
       });
-    }
-    else{
+    } else {
       _lat = 50.785549;
       _long = 6.078375;
       _gotoHome();
     }
-    List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(_lat, _long);
+    List<Placemark> placemark =
+        await Geolocator().placemarkFromCoordinates(_lat, _long);
     _city = placemark[0].locality;
     _searchCity(_city);
   }
@@ -100,15 +106,19 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   _searchCity(String name) async {
-    List<Placemark> res = await Geolocator().placemarkFromAddress(name);
-    setState(() {
-      _city = res[0].locality;
-      _lat = res[0].position.latitude;
-      _long = res[0].position.longitude;
-      _zoomValue = 12;
-      _createMarkers();
-      _gotoHome();
-    });
+    if (name.toUpperCase() == "MY HOME") {
+      _getCurrentLocation();
+    } else {
+      List<Placemark> res = await Geolocator().placemarkFromAddress(name);
+      setState(() {
+        _city = res[0].locality;
+        _lat = res[0].position.latitude;
+        _long = res[0].position.longitude;
+        _zoomValue = 12;
+        _createMarkers();
+        _gotoHome();
+      });
+    }
   }
 
   @override
@@ -124,7 +134,7 @@ class _FeedPageState extends State<FeedPage> {
                 fontSize: 30.0),
           ),
           leading: Padding(
-            padding: const EdgeInsets.only(left:12.0, top: 12.0),
+            padding: const EdgeInsets.only(left: 12.0, top: 12.0),
             child: Column(
               children: <Widget>[
                 Text(
@@ -137,7 +147,10 @@ class _FeedPageState extends State<FeedPage> {
                 ),
                 Text(
                   'YC',
-                  style: TextStyle(color: Colors.blueAccent,fontWeight: FontWeight.bold, fontSize: 12.0),
+                  style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0),
                 ),
               ],
             ),
@@ -164,7 +177,10 @@ class _FeedPageState extends State<FeedPage> {
                       ),
                       Text(
                         'YESes',
-                        style: TextStyle(color: Colors.blueAccent,fontWeight: FontWeight.bold, fontSize: 12.0),
+                        style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.0),
                       ),
                     ],
                   ),
@@ -179,7 +195,7 @@ class _FeedPageState extends State<FeedPage> {
               height: 49.0,
               width: MediaQuery.of(context).size.width,
               child: TextField(
-              controller: _searchController,
+                controller: _searchController,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0),
                     border: InputBorder.none,
@@ -192,7 +208,7 @@ class _FeedPageState extends State<FeedPage> {
                       icon: Icon(
                         Icons.clear,
                       ),
-                    onPressed: _clearSearch,
+                      onPressed: _clearSearch,
                     ),
                     filled: true),
                 onSubmitted: (input) {
@@ -203,7 +219,7 @@ class _FeedPageState extends State<FeedPage> {
               ),
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height-233,
+              height: MediaQuery.of(context).size.height - 233,
               width: MediaQuery.of(context).size.width,
               child: Stack(
                 children: <Widget>[
@@ -222,39 +238,37 @@ class _FeedPageState extends State<FeedPage> {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 20.0),
-        height: 150.0,
-        child: _events == null
-            ? Center(
-          child: Text('Loading events'),
-        )
-            : FutureBuilder(
-            future: _events,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (snapshot.data.documents.length == 0) {
-                return Center(
-                  child: Text('No events found!'),
-                );
-              }
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: snapshot.data.documents.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Event event = Event.fromDoc(snapshot.data.documents[index]);
-                  return _boxes(event);
-                },
-              );
-            })
-
-      ),
+          margin: EdgeInsets.symmetric(vertical: 20.0),
+          height: 150.0,
+          child: _events == null
+              ? Center(
+                  child: Text('Loading events'),
+                )
+              : FutureBuilder(
+                  future: _events,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.data.documents.length == 0) {
+                      return Center(
+                        child: Text('No events found!'),
+                      );
+                    }
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        Event event =
+                            Event.fromDoc(snapshot.data.documents[index]);
+                        return _boxes(event);
+                      },
+                    );
+                  })),
     );
   }
-
 
   Widget _boxes(Event event) {
     double lat = event.location.latitude;
@@ -338,30 +352,30 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Widget _GoogleMap(BuildContext context) {
-    if(_city == null){
+    if (_city == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
     return Container(
-      height: MediaQuery.of(context).size.height-233,
+      height: MediaQuery.of(context).size.height - 233,
       width: MediaQuery.of(context).size.width,
       child: GoogleMap(
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          compassEnabled: false,
-          mapType: MapType.normal,
-          initialCameraPosition: CameraPosition(
-              target: LatLng(34.052235, -118.243683), zoom: _zoomValue),
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-          markers: Set.from(
-            markers,
-          ),),
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
+        compassEnabled: false,
+        mapType: MapType.normal,
+        initialCameraPosition: CameraPosition(
+            target: LatLng(34.052235, -118.243683), zoom: _zoomValue),
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+        markers: Set.from(
+          markers,
+        ),
+      ),
     );
   }
-
 
   Future<void> _gotoHome() async {
     final GoogleMapController controller = await _controller.future;

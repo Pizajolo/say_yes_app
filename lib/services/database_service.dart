@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:say_yes_app/models/activity_model.dart';
 import 'package:say_yes_app/models/event_model.dart';
 import 'package:say_yes_app/utilities/constants.dart';
 import 'package:say_yes_app/models/user_model.dart';
+import 'package:uuid/uuid.dart';
 
 //com.example.sayYesApp
 
@@ -33,6 +35,15 @@ class DatabaseService{
   static Stream<QuerySnapshot> getActivities(String userId) {
     Stream<QuerySnapshot> activities = usersRef.document(userId).collection('activities').orderBy("date", descending: true ).limit(10).snapshots();
     return activities;
+  }
+
+  static void createActivity(Activity activity, String userId) {
+    usersRef.document(userId).collection('activities').document(activity.id).setData({
+      'date': activity.date,
+      'title': activity.title,
+      'eventId': activity.eventId,
+      'type': activity.type,
+    });
   }
 
 //  static Future<List<DocumentSnapshot>> getUserEvents(List participated, List organized) async {

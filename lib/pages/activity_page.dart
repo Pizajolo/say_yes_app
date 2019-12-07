@@ -90,9 +90,14 @@ class _ActivityPageState extends State<ActivityPage> {
                   if (ds["type"] == "Created") {
                     title = "You created a new event:";
                     backgroundColor = Colors.blueAccent;
-                  } else {
-                    title = "Somebody joined your event:";
+                  }
+                  if (ds["type"] == "I joined") {
+                    title = "You joined a new event:";
                     backgroundColor = Colors.lightBlueAccent;
+                  }
+                  if (ds["type"] == "Joined") {
+                    title = "Somebody joined your event:";
+                    backgroundColor = Colors.lightBlue;
                   }
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 5.0),
